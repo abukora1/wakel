@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>نظام الإيجارات الزراعية</title>
+<meta name="description" content="نظام إدارة الإيجارات الزراعية، المستأجرين، القطع، والمخالفات" />
+<meta name="theme-color" content="#15803d" />
+<link rel="manifest" href="manifest.json" />
+<link rel="icon" href="assets/img/logo.svg" type="image/svg+xml" />
+<link rel="apple-touch-icon" href="assets/img/logo.svg" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+<link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+
+<header class="app-header">
+  <div class="header-row">
+    <img src="assets/img/logo.svg" alt="شعار التطبيق" />
+    <div class="header-title">نظام الإيجارات الزراعية</div>
+    <button class="icon-btn" id="rentPriceBtn" title="سعر الفدان"><i class="fa-solid fa-coins"></i></button>
+    <button class="icon-btn" id="refreshBtn" title="تحديث"><i class="fa-solid fa-arrows-rotate"></i></button>
+  </div>
+  <div class="search-wrap">
+    <div class="search-box">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <input type="text" id="searchInput" placeholder="ابحث عن مستأجر، قطعة، أو مخالفة..." />
+      <i class="fa-solid fa-circle-xmark clear-btn" id="searchClearBtn"></i>
+    </div>
+  </div>
+</header>
+
+<main class="container">
+
+  <section class="stats-grid">
+    <div class="stat-card"><div class="label">المستأجرين</div><div class="value" id="statTenants">0</div></div>
+    <div class="stat-card"><div class="label">القطع</div><div class="value" id="statParcels">0</div></div>
+    <div class="stat-card"><div class="label">مخالفات نشطة</div><div class="value" id="statInfringements">0</div></div>
+    <div class="stat-card"><div class="label">سعر الفدان (ج.م)</div><div class="value" id="statRentPrice">0</div></div>
+  </section>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="tenants"><i class="fa-solid fa-users"></i> المستأجرين</button>
+    <button class="tab-btn" data-tab="parcels"><i class="fa-solid fa-tractor"></i> القطع</button>
+    <button class="tab-btn" data-tab="infringements"><i class="fa-solid fa-triangle-exclamation"></i> المخالفات</button>
+  </div>
+
+  <div class="actions-bar">
+    <button class="btn btn-primary" id="addTenantBtn"><i class="fa-solid fa-user-plus"></i> إضافة مستأجر</button>
+    <button class="btn btn-primary" id="addParcelBtn"><i class="fa-solid fa-plus"></i> إضافة قطعة</button>
+    <button class="btn btn-danger" id="addInfringementBtn"><i class="fa-solid fa-flag"></i> تسجيل مخالفة</button>
+    <button class="btn btn-secondary" id="reportBtn"><i class="fa-solid fa-file-lines"></i> تقرير</button>
+    <button class="btn btn-secondary" id="exportReportBtn"><i class="fa-solid fa-download"></i> تصدير تقرير</button>
+    <button class="btn btn-secondary" id="backupBtn"><i class="fa-solid fa-cloud-arrow-up"></i> نسخ احتياطي</button>
+  </div>
+
+  <div class="tab-panel" data-panel="tenants">
+    <div class="card-list" id="tenantsList"></div>
+  </div>
+  <div class="tab-panel" data-panel="parcels" style="display:none">
+    <div class="card-list" id="parcelsList"></div>
+  </div>
+  <div class="tab-panel" data-panel="infringements" style="display:none">
+    <div class="card-list" id="infringementsList"></div>
+  </div>
+
+</main>
+
+<button class="btn btn-primary fab-install" id="installBtn" style="display:none">
+  <i class="fa-solid fa-mobile-screen-button"></i> تثبيت التطبيق
+</button>
+
+<!-- ===================== Modals ===================== -->
+
+<!-- نافذة إضافة مستأجر -->
+<div class="modal-overlay" id="tenantModal">
+  <div class="modal-box">
+    <div class="modal-header"><h3><i class="fa-solid fa-user-plus"></i> إضافة مستأجر</h3>
+      <button class="icon-btn" style="background:#f1f5f9;color:#0f172a" data-close-modal="tenantModal"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <form id="tenantForm">
+      <div class="modal-body">
+        <div class="form-group"><label>الاسم *</label><input name="name" required /></div>
+        <div class="form-group"><label>رقم الهاتف</label><input name="phone" type="tel" placeholder="مثال: 201234567890+" /></div>
+        <div class="form-group"><label>الرقم القومي</label><input name="national_id" /></div>
+        <div class="form-group"><label>العنوان</label><input name="address" /></div>
+        <div class="form-group"><label>ملاحظات</label><textarea name="notes" rows="3"></textarea></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-close-modal="tenantModal">إلغاء</button>
+        <button type="submit" class="btn btn-primary">إضافة</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- نافذة إضافة قطعة -->
+<div class="modal-overlay" id="parcelModal">
+  <div class="modal-box">
+    <div class="modal-header"><h3><i class="fa-solid fa-tractor"></i> إضافة قطعة زراعية</h3>
+      <button class="icon-btn" style="background:#f1f5f9;color:#0f172a" data-close-modal="parcelModal"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <form id="parcelForm">
+      <div class="modal-body">
+        <div class="form-group"><label>اسم القطعة *</label><input name="name" required /></div>
+        <div class="form-group"><label>المستأجر</label><select name="tenant_id"></select></div>
+        <div class="form-group"><label>القطعة الأم (اختياري)</label><select name="parent_parcel_id"></select></div>
+        <div class="form-group"><label>المنطقة</label><input name="region" /></div>
+        <div class="form-group"><label>المساحة (بالفدان) *</label><input name="area_feddan" type="number" step="0.0001" min="0" required /></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-close-modal="parcelModal">إلغاء</button>
+        <button type="submit" class="btn btn-primary">إضافة</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- نافذة تسجيل مخالفة -->
+<div class="modal-overlay" id="infringementModal">
+  <div class="modal-box">
+    <div class="modal-header"><h3><i class="fa-solid fa-flag"></i> تسجيل مخالفة</h3>
+      <button class="icon-btn" style="background:#f1f5f9;color:#0f172a" data-close-modal="infringementModal"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <form id="infringementForm">
+      <div class="modal-body">
+        <div class="form-group"><label>القطعة *</label><select name="parcel_id" required></select></div>
+        <div class="form-group"><label>وصف المخالفة *</label><textarea name="description" rows="3" required></textarea></div>
+        <div class="form-group"><label>تاريخ التقرير</label><input name="report_date" type="date" /></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-close-modal="infringementModal">إلغاء</button>
+        <button type="submit" class="btn btn-primary">تسجيل</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- نافذة التفاصيل -->
+<div class="modal-overlay" id="detailModal">
+  <div class="modal-box">
+    <div class="modal-header"><h3 id="detailTitle">التفاصيل</h3>
+      <button class="icon-btn" style="background:#f1f5f9;color:#0f172a" data-close-modal="detailModal"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body" id="detailBody"></div>
+    <div class="modal-footer">
+      <button class="btn btn-danger" id="detailDeleteBtn"><i class="fa-solid fa-trash"></i> حذف</button>
+      <button class="btn btn-whatsapp" id="detailWhatsappBtn"><i class="fa-brands fa-whatsapp"></i> تواصل عبر واتساب</button>
+    </div>
+  </div>
+</div>
+
+<!-- نافذة النسخ الاحتياطي -->
+<div class="modal-overlay" id="backupModal">
+  <div class="modal-box">
+    <div class="modal-header"><h3><i class="fa-solid fa-cloud-arrow-up"></i> النسخ الاحتياطي والاستعادة</h3>
+      <button class="icon-btn" style="background:#f1f5f9;color:#0f172a" data-close-modal="backupModal"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <p style="color:#64748b">احفظ نسخة من بياناتك محلياً أو على السحابة، أو استعد نسخة سابقة.</p>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-top:14px">
+        <button class="btn btn-primary" id="backupLocalBtn"><i class="fa-solid fa-download"></i> تحميل نسخة محلية (JSON)</button>
+        <button class="btn btn-secondary" id="backupCloudBtn"><i class="fa-solid fa-cloud-arrow-up"></i> رفع نسخة على Supabase</button>
+        <label class="btn btn-secondary" style="text-align:center;cursor:pointer">
+          <i class="fa-solid fa-file-arrow-up"></i> استعادة من ملف
+          <input type="file" id="restoreFileInput" accept=".json" style="display:none" />
+        </label>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- نافذة سعر الفدان -->
+<div class="modal-overlay" id="rentPriceModal">
+  <div class="modal-box">
+    <div class="modal-header"><h3><i class="fa-solid fa-coins"></i> تعديل سعر الفدان</h3>
+      <button class="icon-btn" style="background:#f1f5f9;color:#0f172a" data-close-modal="rentPriceModal"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <form id="rentPriceForm">
+      <div class="modal-body">
+        <div class="form-group"><label>سعر الفدان الشهري (ج.م)</label><input id="rentPriceInput" type="number" step="0.01" min="0" required /></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-close-modal="rentPriceModal">إلغاء</button>
+        <button type="submit" class="btn btn-primary">حفظ</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script type="module" src="assets/js/app.js"></script>
+</body>
+</html>

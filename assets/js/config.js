@@ -4,7 +4,7 @@
 
 export const SUPABASE_CONFIG = {
   // ضع رابط مشروعك من Supabase Project Settings → API → Project URL
-  url: "https://YOUR-PROJECT-REF.supabase.co",
+  url: "https://ogsjlbbzzjpjqcrqbibe.supabase.co/rest/v1/",
 
   // مفتاح "publishable" آمن للاستخدام في الواجهة الأمامية (المتصفح)
   anonKey: "sb_publishable_GazNQnJ0SqHuDDrKMNDWmg_uClUJaPB"

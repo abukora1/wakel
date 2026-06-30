@@ -1,195 +1,44 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>وكّل | أداة تذكير الإيجار</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Segoe UI', Tahoma, sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #e9ecf2 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .container {
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            padding: 40px;
-            width: 100%;
-            max-width: 460px;
-            text-align: center;
-        }
-        .logo {
-            font-size: 42px;
-            margin-bottom: 10px;
-        }
-        h1 {
-            color: #1a1a2e;
-            margin-bottom: 5px;
-            font-size: 28px;
-        }
-        .subtitle {
-            color: #6b7280;
-            margin-bottom: 30px;
-            font-size: 14px;
-        }
-        .input-group {
-            margin-bottom: 18px;
-            text-align: right;
-        }
-        .input-group label {
-            display: block;
-            margin-bottom: 6px;
-            color: #374151;
-            font-weight: 600;
-            font-size: 14px;
-        }
-        .input-group input {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e5e7eb;
-            border-radius: 10px;
-            font-size: 16px;
-            transition: all 0.3s;
-            font-family: inherit;
-        }
-        .input-group input:focus {
-            outline: none;
-            border-color: #c9a84c;
-            box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.15);
-        }
-        .btn {
-            width: 100%;
-            padding: 14px;
-            background: #1a1a2e;
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background 0.3s;
-            font-family: inherit;
-        }
-        .btn:hover { background: #16213e; }
-        .btn-gold {
-            background: #c9a84c;
-            margin-top: 10px;
-        }
-        .btn-gold:hover { background: #b8943a; }
-        .note {
-            margin-top: 20px;
-            font-size: 12px;
-            color: #9ca3af;
-        }
-        .hidden { display: none; }
-        .result {
-            margin-top: 20px;
-            padding: 15px;
-            background: #ecfdf5;
-            border-radius: 10px;
-            color: #065f46;
-            font-size: 14px;
-        }
-        .result.error {
-            background: #fef2f2;
-            color: #991b1b;
-        }
-    </style>
-</head>
-<body>
+exports.handler = async (event) => {
+    if (event.httpMethod !== 'POST') {
+        return { statusCode: 405, body: JSON.stringify({ error: 'Method Not Allowed' }) };
+    }
 
-    <!-- شاشة تسجيل الدخول -->
-    <div id="loginScreen" class="container">
-        <div class="logo">🏠</div>
-        <h1>وكّل</h1>
-        <p class="subtitle">أداة ذكية لتذكير المستأجرين بالإيجار</p>
-        <div class="input-group">
-            <label>البريد الإلكتروني</label>
-            <input type="email" id="loginEmail" placeholder="example@email.com">
-        </div>
-        <div class="input-group">
-            <label>كلمة المرور</label>
-            <input type="password" id="loginPassword" placeholder="••••••••">
-        </div>
-        <button class="btn" onclick="login()">دخول</button>
-        <p class="note">تجربة مجانية | لا تحتاج بريدًا حقيقيًا الآن</p>
-    </div>
-
-    <!-- شاشة لوحة التحكم -->
-    <div id="dashboardScreen" class="container hidden">
-        <div class="logo">👋</div>
-        <h1>مرحبًا بك في وكّل</h1>
-        <p class="subtitle">أدخل بيانات المستأجر لإرسال التذكير</p>
-        <div class="input-group">
-            <label>اسم المستأجر</label>
-            <input type="text" id="tenantName" placeholder="أدخل الاسم الكامل">
-        </div>
-        <div class="input-group">
-            <label>رقم الجوال (مع مفتاح الدولة)</label>
-            <input type="text" id="tenantPhone" placeholder="966XXXXXXXXX">
-        </div>
-        <div class="input-group">
-            <label>تاريخ الاستحقاق</label>
-            <input type="date" id="dueDate">
-        </div>
-        <button class="btn btn-gold" onclick="sendReminder()">🚀 أرسل تذكير واتساب الآن</button>
-        <div id="resultMessage" class="result hidden"></div>
-        <p class="note" style="margin-top:15px;">سيتم إرسال التذكير تلقائياً عبر واتساب</p>
-    </div>
-
-    <script>
-        // دخول تجريبي
-        function login() {
-            const email = document.getElementById('loginEmail').value.trim();
-            const password = document.getElementById('loginPassword').value.trim();
-            if (!email || !password) {
-                alert('الرجاء إدخال البريد وكلمة المرور');
-                return;
-            }
-            document.getElementById('loginScreen').classList.add('hidden');
-            document.getElementById('dashboardScreen').classList.remove('hidden');
+    try {
+        const { to, name, dueDate } = JSON.parse(event.body);
+        if (!to || !name || !dueDate) {
+            return { statusCode: 400, body: JSON.stringify({ error: 'جميع الحقول مطلوبة' }) };
         }
 
-        // إرسال تذكير عبر Netlify Function
-        async function sendReminder() {
-            const name = document.getElementById('tenantName').value.trim();
-            const phone = document.getElementById('tenantPhone').value.trim();
-            const dueDate = document.getElementById('dueDate').value;
+        const accountSid = process.env.TWILIO_ACCOUNT_SID;
+        const authToken = process.env.TWILIO_AUTH_TOKEN;
+        const fromNumber = process.env.TWILIO_PHONE_NUMBER;
 
-            if (!name || !phone || !dueDate) {
-                alert('الرجاء ملء جميع الحقول');
-                return;
-            }
+        // بناء رابط API Twilio
+        const url = `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`;
 
-            const resultDiv = document.getElementById('resultMessage');
-            resultDiv.textContent = '⏳ جاري إرسال التذكير...';
-            resultDiv.classList.remove('hidden', 'error');
-            resultDiv.classList.add('result');
+        // إرسال الطلب باستخدام fetch المدمج
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Authorization': 'Basic ' + Buffer.from(accountSid + ':' + authToken).toString('base64')
+            },
+            body: new URLSearchParams({
+                From: `whatsapp:${fromNumber}`,
+                To: `whatsapp:${to}`,
+                Body: `السلام عليكم ${name}،\nهذا تذكير من وكّل بدفع الإيجار المستحق بتاريخ ${dueDate}.\nنشكر تعاونك.`
+            }).toString()
+        });
 
-            try {
-                const response = await fetch('/.netlify/functions/send-whatsapp', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ to: phone, name, dueDate })
-                });
-                const data = await response.json();
+        const data = await response.json();
 
-                if (data.success) {
-                    resultDiv.textContent = '✅ تم إرسال التذكير بنجاح!';
-                } else {
-                    resultDiv.textContent = '❌ فشل الإرسال: ' + (data.error || 'خطأ غير معروف');
-                    resultDiv.classList.add('error');
-                }
-            } catch (err) {
-                resultDiv.textContent = '❌ حدث خطأ في الاتصال بالخادم.';
-                resultDiv.classList.add('error');
-            }
+        if (response.ok) {
+            return { statusCode: 200, body: JSON.stringify({ success: true, sid: data.sid }) };
+        } else {
+            return { statusCode: 500, body: JSON.stringify({ error: data.message || 'فشل الإرسال' }) };
         }
-    </script>
-</body>
-</html>
+
+    } catch (error) {
+        return { statusCode: 500, body: JSON.stringify({ error: error.message }) };
+    }
+};

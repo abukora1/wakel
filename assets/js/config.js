@@ -4,8 +4,9 @@
 
 export const SUPABASE_CONFIG = {
   // ضع رابط مشروعك من Supabase Project Settings → API → Project URL
-  url: "https://ogsjlbbzzjpjqcrqbibe.supabase.co/rest/v1/",
-
+  // مثال: https://xxxxx.supabase.co (بدون /rest/v1/)
+  url: "https://ogsjlbbzzjpjqcrqbibe.supabase.co",
+  
   // مفتاح "publishable" آمن للاستخدام في الواجهة الأمامية (المتصفح)
   anonKey: "sb_publishable_GazNQnJ0SqHuDDrKMNDWmg_uClUJaPB"
 };
@@ -35,7 +36,7 @@ export const APP_CONFIG = {
   feddanToQirat: 24,
   feddanToSahm: 576,
   infringementThresholds: {
-    underMonitoring: 0.02,
-    critical: 0.05
+    underMonitoring: 0.02,   // 2% من مساحة القطعة = تحت المراقبة
+    critical: 0.05          // 5% من مساحة القطعة = حرج
   }
 };

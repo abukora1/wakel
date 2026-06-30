@@ -3,12 +3,11 @@
 // =========================================================
 
 export const SUPABASE_CONFIG = {
-  // ضع رابط مشروعك من Supabase Project Settings → API → Project URL
-  // مثال: https://xxxxx.supabase.co (بدون /rest/v1/)
+  // رابط مشروعك من Supabase
   url: "https://ogsjlbbzzjpjqcrqbibe.supabase.co",
   
-  // مفتاح "publishable" آمن للاستخدام في الواجهة الأمامية (المتصفح)
-  anonKey: "sb_publishable_GazNQnJ0SqHuDDrKMNDWmg_uClUJaPB"
+  // المفتاح العام (anon public) - تم التحديث
+  anonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9nc2psYmJ6empwanFjcnFiaWJlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI3OTM2MTcsImV4cCI6MjA5ODM2OTYxN30.7Xc7lp7ekmLuDcjFeBM7SvkphF5Ef8iOAqJZ5xqBamg"
 };
 
 // ⚠️ تنبيه أمان مهم:
